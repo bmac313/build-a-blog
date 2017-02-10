@@ -1,0 +1,20 @@
+{% extends base.html %}
+
+<h1>New Post</h1>
+<form method="post" action="publish">
+	<div class="form-field">
+		<label>
+			Title
+			<input type="text" name="post-title" />
+		</label>
+	</div>
+	<div class="form-field">
+		<label>
+			Text
+			<textarea name="post-body"></textarea>
+		</label>
+	</div>
+	<div class="form-field">
+		<input type="submit" value="Publish" />
+	</div>
+</form>
