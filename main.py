@@ -21,7 +21,7 @@ import os
 from google.appengine.ext import db
 
 
-class Post(db.Model):
+class BlogPost(db.Model):
 	title = db.StringProperty(required=True)
 	body = db.TextProperty(required=True)
 	publish_time = db.DateTimeProperty(auto_now_add=True)
@@ -41,8 +41,10 @@ class MainHandler(Handler):
 		
 class MainBlog(Handler):
 	def get(self):
+		# TODO vary the offset by what is sent in the URL
+		blog_posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY publish_time DESC LIMIT 5")
 		t = jinja_env.get_template("main-blog.html")
-		page_content = t.render(post_title = "Test", post_body = "lorem ipsum text")
+		page_content = t.render(posts = blog_posts)
 		self.response.write(page_content)
 		
 class NewPost(Handler):
@@ -50,6 +52,20 @@ class NewPost(Handler):
 		t = jinja_env.get_template("new-post.html")
 		page_content = t.render()
 		self.response.write(page_content)
+
+class PublishPost(Handler):
+	# TODO 1: New post does not show up on the blog page on redirect, but does when you refresh / revisit page.
+	# TODO 2: Set up error messages for form
+	def post(self):
+		# Get user input from the form in new-post.html
+		post_title = cgi.escape(self.request.get("post-title"), quote=True)
+		post_body = cgi.escape(self.request.get("post-body"), quote=True)
+		
+		# Create a BlogPost object and save it in the database
+		new_post = BlogPost(title = post_title, body = post_body)
+		new_post.put()
+		
+		self.redirect("/")
 
 class ViewPost(Handler):
 	def get(self):
@@ -59,5 +75,6 @@ app = webapp2.WSGIApplication([
 	('/', MainHandler),
 	('/blog', MainBlog),
 	('/newpost', NewPost),
-	webapp2.Route('/post/<post_id:\d+>', ViewPost)
+	('/publish', PublishPost),
+	webapp2.Route('/blog/post/<post_id:\d+>', ViewPost)
 ], debug=True)
