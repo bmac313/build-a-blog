@@ -4,14 +4,14 @@
 
 <h1>Just a normal blog.</h1>
 <div class="posts">
-	{% for post in posts %}
+	{# for post in posts #}
 	<article class="post">
 		<h2>{{ post_title }}</h2>
 		<p>
 			{{ post_body }}
 		</p>
 	</article>
-	{% endfor %}
+	{# endfor #}
 </div>
 <nav class="bottom-nav">
 	<ul>
@@ -20,4 +20,4 @@
 	</ul>
 </nav>
 
-{% endblock % }
+{% endblock %}
