@@ -15,6 +15,7 @@
 # limitations under the License.
 #
 import webapp2
+import string
 import cgi
 import jinja2
 import os
@@ -26,18 +27,22 @@ class BlogPost(db.Model):
 	body = db.TextProperty(required=True)
 	publish_time = db.DateTimeProperty(auto_now_add=True)
 
+	
 template_dir = os.path.join(os.path.dirname(__file__), "templates")
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
+
 
 class Handler(webapp2.RequestHandler):
 	"""Base request handler class for the entire app"""
 	def renderError(self, error_code):
 		self.error(error_code)
-		self.response.write("Something went wrong while loading this page! If you'd like more info on the error, you can search for the error code above.")
+		self.response.write("Something went wrong while loading this page! If you'd like more info on the error, you can search for the error code below: <br />" + str(error_code))
 
+		
 class MainHandler(Handler):
 	def get(self):
 		self.redirect('/blog')
+
 		
 class MainBlog(Handler):
 	def get(self):
@@ -46,6 +51,7 @@ class MainBlog(Handler):
 		t = jinja_env.get_template("main-blog.html")
 		page_content = t.render(posts = blog_posts)
 		self.response.write(page_content)
+
 		
 class NewPost(Handler):
 	def get(self):
@@ -53,28 +59,50 @@ class NewPost(Handler):
 		page_content = t.render()
 		self.response.write(page_content)
 
+		
 class PublishPost(Handler):
-	# TODO 1: New post does not show up on the blog page on redirect, but does when you refresh / revisit page.
-	# TODO 2: Set up error messages for form
+	# TODO 1: Set up error messages for form
+	# TODO 2: Unexpected errors from maketrans and translate functions. Find another way to remove punctuation from the title.
 	def post(self):
 		# Get user input from the form in new-post.html
 		post_title = cgi.escape(self.request.get("post-title"), quote=True)
 		post_body = cgi.escape(self.request.get("post-body"), quote=True)
 		
+		# Initialize a string for the Key Name to be used in the new BlogPost below.
+		# The Key Name will be the post title with hyphens separating each word.
+		key_name_str = ""
+		
+		# Split the words and put them into a list called title_words.
+		# Then re-construct the string using join() with '-' as the separator.
+		title_words = post_title.lower().split()
+		key_name_str = "-".join(title_words)
+		
 		# Create a BlogPost object and save it in the database
-		new_post = BlogPost(title = post_title, body = post_body)
+		new_post = BlogPost(key_name = key_name_str, title = post_title, body = post_body)
 		new_post.put()
 		
-		self.redirect("/")
+		self.redirect("/blog/post/" + key_name_str)
 
+		
 class ViewPost(Handler):
-	def get(self):
-		pass
+	def get(self, post_id):
+		post_to_display = BlogPost.get_by_key_name(post_id)
+		
+		if not post_to_display:
+			self.renderError(404)
+		else:
+			t = jinja_env.get_template("view-post.html")
+			page_content = t.render(post_title = post_to_display.title,
+									post_body = post_to_display.body,
+									timestamp = post_to_display.publish_time)
+			
+			self.response.write(page_content)
 
+		
 app = webapp2.WSGIApplication([
 	('/', MainHandler),
 	('/blog', MainBlog),
 	('/newpost', NewPost),
 	('/publish', PublishPost),
-	webapp2.Route('/blog/post/<post_id:\d+>', ViewPost)
+	webapp2.Route('/blog/post/<post_id:.+>', ViewPost)
 ], debug=True)
