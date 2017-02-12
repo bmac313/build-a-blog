@@ -1,12 +1,16 @@
-{% extends base.html %}
+{% extends "base.html" %}
 
 {% block content %}
 
+<h1>Just a normal blog.</h1>
 <div class="posts">
 	<article class="post">
 		<h2>{{ post_title }}</h2>
 		<p>
 			{{ post_body }}
+		</p>
+		<p>
+			Published by bmcrae at {{ timestamp }}.
 		</p>
 	</article>
 </div>
