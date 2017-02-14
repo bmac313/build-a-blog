@@ -6,13 +6,12 @@
 <div class="posts">
 	{% for post in posts %}
 	<article class="post">
-		<!-- TODO: custom URLs to each post by Key Name -->
-		<h2><a href="#">{{ post.title }}</a></h2>
+		<h2><a href="/blog/post/{{ post.key().name() }}">{{ post.title }}</a></h2>
 		<p>
 			{{ post.body }}
 		</p>
 		<p>
-			Published by bmcrae at {{ post.publish_time }}.
+			Posted by bmcrae at {{ post.publish_time }}.
 		</p>
 	</article>
 	{% endfor %}
