@@ -62,7 +62,7 @@ class NewPost(Handler):
 		
 class PublishPost(Handler):
 	# TODO 1: Set up error messages for form
-	# TODO 2: Unexpected errors from maketrans and translate functions. Find another way to remove punctuation from the title.
+	# TODO 2: Making a post with the same title as another overwrites it, this shouldn't happen
 	def post(self):
 		# Get user input from the form in new-post.html
 		post_title = cgi.escape(self.request.get("post-title"), quote=True)
@@ -73,9 +73,20 @@ class PublishPost(Handler):
 		key_name_str = ""
 		
 		# Split the words and put them into a list called title_words.
-		# Then re-construct the string using join() with '-' as the separator.
 		title_words = post_title.lower().split()
-		key_name_str = "-".join(title_words)
+		
+		# Remove punctuation from each word, add each word to new list
+		title_words_no_punc = []
+		for word in title_words:	
+			word_no_punc = ""
+			for chara in word:
+				if chara not in string.punctuation:
+					word_no_punc += chara
+			title_words_no_punc.append(word_no_punc)
+		
+		# Re-construct the string using join() with '-' as the separator.
+		key_name_str = "-".join(title_words_no_punc)
+		
 		
 		# Create a BlogPost object and save it in the database
 		new_post = BlogPost(key_name = key_name_str, title = post_title, body = post_body)
