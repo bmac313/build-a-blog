@@ -55,14 +55,13 @@ class MainBlog(Handler):
 		
 class NewPost(Handler):
 	def get(self):
+		error_msg = self.request.get("error")
 		t = jinja_env.get_template("new-post.html")
-		page_content = t.render()
+		page_content = t.render(error = error_msg)
 		self.response.write(page_content)
 
 		
 class PublishPost(Handler):
-	# TODO 1: Set up error messages for form
-	# TODO 2: Making a post with the same title as another overwrites it, this shouldn't happen
 	def post(self):
 		# Get user input from the form in new-post.html
 		post_title = cgi.escape(self.request.get("post-title"), quote=True)
@@ -83,16 +82,30 @@ class PublishPost(Handler):
 				if chara not in string.punctuation:
 					word_no_punc += chara
 			title_words_no_punc.append(word_no_punc)
+			
+		# Compare the entered title to other titles in the database, to make sure the title does not already exist.
+		posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY publish_time DESC")
+		error_msg = ""
+		error_occured = False
 		
-		# Re-construct the string using join() with '-' as the separator.
-		key_name_str = "-".join(title_words_no_punc)
+		# If another post has the same title (case insensitive), return an error.
+		for post in posts:
+			if cgi.escape(post.title.lower()) == cgi.escape(post_title.lower()):
+				error_occured = True
 		
-		
-		# Create a BlogPost object and save it in the database
-		new_post = BlogPost(key_name = key_name_str, title = post_title, body = post_body)
-		new_post.put()
-		
-		self.redirect("/blog/post/" + key_name_str)
+		if error_occured == True:
+			error_msg = "There is already another post with that ID (note: IDs are obtained through the post title, lowercase and with punctuation removed)."
+			self.redirect("/newpost?error=error_msg")
+		else:
+			# Re-construct the string using join() with '-' as the separator.
+			key_name_str = "-".join(title_words_no_punc)
+			
+			
+			# Create a BlogPost object and save it in the database
+			new_post = BlogPost(key_name = key_name_str, title = post_title, body = post_body)
+			new_post.put()
+			
+			self.redirect("/blog/post/" + key_name_str)
 
 		
 class ViewPost(Handler):
