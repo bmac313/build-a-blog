@@ -36,7 +36,7 @@ class Handler(webapp2.RequestHandler):
 	"""Base request handler class for the entire app"""
 	def renderError(self, error_code):
 		self.error(error_code)
-		self.response.write("Something went wrong while loading this page! If you'd like more info on the error, you can search for the error code below: <br />" + str(error_code))
+		#self.response.write("Something went wrong while loading this page! If you'd like more info on the error, you can search for the error code below: <br />" + str(error_code))
 
 		
 class MainHandler(Handler):
@@ -46,10 +46,22 @@ class MainHandler(Handler):
 		
 class MainBlog(Handler):
 	def get(self):
-		# TODO vary the offset by what is sent in the URL
-		blog_posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY publish_time DESC LIMIT 5")
+		page = self.request.get("page")
+		if not page:
+			page = 1
+		else:
+			page = int(page)
+			
+		# Add 5 to offset_num for each page AFTER page 1 (i.e.: why page-1 is being multiplied)
+		# offset_num is converted to string before assignment so it can be used in the GQL query.
+		offset_num = str(5 * (page-1)) 
+		blog_posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY publish_time DESC LIMIT 5 OFFSET " + offset_num)
+		
+		post_count = blog_posts.count()
+		last_page = (post_count // 5) + 1
+		
 		t = jinja_env.get_template("main-blog.html")
-		page_content = t.render(posts = blog_posts)
+		page_content = t.render(posts = blog_posts, page_num = page, last_page = last_page)
 		self.response.write(page_content)
 
 		
@@ -92,8 +104,11 @@ class PublishPost(Handler):
 		for post in posts:
 			if cgi.escape(post.title.lower()) == cgi.escape(post_title.lower()):
 				error_occured = True
+				
+		# Check that input is not empty space
 		
-		if error_occured == True:
+		
+		if error_occured:
 			error_msg = "There is already another post with that ID (note: IDs are obtained through the post title, lowercase and with punctuation removed)."
 			self.redirect("/newpost?error=" + error_msg)
 		else:

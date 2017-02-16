@@ -18,8 +18,12 @@
 </div>
 <nav class="bottom-nav">
 	<ul>
-		<li><a href="#">prev</a></li>
-		<li><a href="#">next</a></li>
+	{% if page_num > 1 %}	
+		<li><a href="/blog?page={{ page_num - 1 }}">prev</a></li>
+	{% endif %}
+	{% if page_num < last_page %}
+		<li><a href="/blog?page={{ page_num + 1 }}">next</a></li>
+	{% endif %}
 	</ul>
 </nav>
 
