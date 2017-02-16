@@ -120,7 +120,7 @@ class PublishPost(Handler):
 			error_occured = True
 		
 		if error_occured == True:
-			self.redirect("/newpost?error_1=" + error_msg_1 + "&error_2=" + error_msg_2)
+			self.redirect("/blog/newpost?error_1=" + error_msg_1 + "&error_2=" + error_msg_2)
 		else:
 			# Re-construct the string using join() with '-' as the separator.
 			key_name_str = "-".join(title_words_no_punc)
@@ -129,7 +129,7 @@ class PublishPost(Handler):
 			new_post = BlogPost(key_name = key_name_str, title = post_title, body = post_body)
 			new_post.put()
 			
-			self.redirect("/blog/post/" + key_name_str)
+			self.redirect("/blog/" + key_name_str)
 
 		
 class ViewPost(Handler):
@@ -150,7 +150,7 @@ class ViewPost(Handler):
 app = webapp2.WSGIApplication([
 	('/', MainHandler),
 	('/blog', MainBlog),
-	('/newpost', NewPost),
+	('/blog/newpost', NewPost),
 	('/publish', PublishPost),
-	webapp2.Route('/blog/post/<post_id:.+>', ViewPost)
+	webapp2.Route('/blog/<post_id:.+>', ViewPost)
 ], debug=True)

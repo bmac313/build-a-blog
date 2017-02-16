@@ -6,7 +6,7 @@
 <div class="posts">
 	{% for post in posts %}
 	<article class="post">
-		<h2><a href="/blog/post/{{ post.key().name() }}">{{ post.title }}</a></h2>
+		<h2><a href="/blog/{{ post.key().name() }}">{{ post.title }}</a></h2>
 		<p>
 			{{ post.body }}
 		</p>
