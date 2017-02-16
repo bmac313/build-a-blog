@@ -95,7 +95,7 @@ class PublishPost(Handler):
 		
 		if error_occured == True:
 			error_msg = "There is already another post with that ID (note: IDs are obtained through the post title, lowercase and with punctuation removed)."
-			self.redirect("/newpost?error=error_msg")
+			self.redirect("/newpost?error=" + error_msg)
 		else:
 			# Re-construct the string using join() with '-' as the separator.
 			key_name_str = "-".join(title_words_no_punc)
