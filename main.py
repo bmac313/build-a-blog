@@ -58,7 +58,10 @@ class MainBlog(Handler):
 		blog_posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY publish_time DESC LIMIT 5 OFFSET " + offset_num)
 		
 		post_count = blog_posts.count()
-		last_page = (post_count // 5) + 1
+		if post_count % 5 == 0:  # If posts divide evenly into 5 pages
+			last_page = post_count / 5
+		else:
+			last_page = (post_count // 5) + 1
 		
 		t = jinja_env.get_template("main-blog.html")
 		page_content = t.render(posts = blog_posts, page_num = page, last_page = last_page)
@@ -67,16 +70,17 @@ class MainBlog(Handler):
 		
 class NewPost(Handler):
 	def get(self):
-		error_msg = self.request.get("error")
+		error_msg_1 = self.request.get("error_1")
+		error_msg_2 = self.request.get("error_2")
 		t = jinja_env.get_template("new-post.html")
-		page_content = t.render(error = error_msg)
+		page_content = t.render(error_1 = error_msg_1, error_2 = error_msg_2)
 		self.response.write(page_content)
 
 		
 class PublishPost(Handler):
 	def post(self):
 		# Get user input from the form in new-post.html
-		post_title = cgi.escape(self.request.get("post-title"), quote=True)
+		post_title = cgi.escape(self.request.get("post-title"), quote=True).strip()
 		post_body = cgi.escape(self.request.get("post-body"), quote=True)
 		
 		# Initialize a string for the Key Name to be used in the new BlogPost below.
@@ -97,24 +101,29 @@ class PublishPost(Handler):
 			
 		# Compare the entered title to other titles in the database, to make sure the title does not already exist.
 		posts = db.GqlQuery("SELECT * FROM BlogPost ORDER BY publish_time DESC")
-		error_msg = ""
+		error_msg_1 = ""
+		error_msg_2 = ""
 		error_occured = False
 		
 		# If another post has the same title (case insensitive), return an error.
 		for post in posts:
 			if cgi.escape(post.title.lower()) == cgi.escape(post_title.lower()):
+				error_msg_1 = "There is already another post with that ID (note: IDs are obtained through the post title, lowercase and with punctuation removed)."
 				error_occured = True
 				
 		# Check that input is not empty space
+		if post_title.isspace():
+			error_msg_1 = "The post title cannot be blank."
+			error_occured = True
+		if post_body.isspace():
+			error_msg_2 = "The post body cannot be blank."
+			error_occured = True
 		
-		
-		if error_occured:
-			error_msg = "There is already another post with that ID (note: IDs are obtained through the post title, lowercase and with punctuation removed)."
-			self.redirect("/newpost?error=" + error_msg)
+		if error_occured == True:
+			self.redirect("/newpost?error_1=" + error_msg_1 + "&error_2=" + error_msg_2)
 		else:
 			# Re-construct the string using join() with '-' as the separator.
 			key_name_str = "-".join(title_words_no_punc)
-			
 			
 			# Create a BlogPost object and save it in the database
 			new_post = BlogPost(key_name = key_name_str, title = post_title, body = post_body)
