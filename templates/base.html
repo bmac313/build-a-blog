@@ -1,22 +1,85 @@
 <html>
 	<head>
 		<title>Just a normal blog.</title>
-		<link rel="stylesheet" href="css/normalize.css" type="text/css" />
-		<link rel="stylesheet" href="css/style.css" type="text/css" />
+		<style>
+			@import url('https://fonts.googleapis.com/css?family=Lato');
+
+			body {
+				font-family:   'Lato', sans-serif;
+			}
+
+			.middle-col {
+				max-width:     700px;
+				margin:        auto;
+				padding-left:  7px;
+				padding-right: 7px;
+			}
+
+			h2 {
+				font-family: 'Lato Light', sans-serif;
+			}
+
+			.navbar ul, .bottom-nav ul {
+				padding-left:  0px;
+			}
+
+			.navbar ul li, .bottom-nav ul li{
+				display:       inline;
+				padding-left:  10px;
+				padding-right: 10px;
+			}
+
+			.post {
+				padding-bottom:8px;
+			}
+			
+			.time-stamp {
+				font-style:    italic;
+				font-size:     14px;
+			}
+			
+			.form-field input {
+				font-size:     20px;
+			}
+			
+			.form-field textarea {
+				width:         360px;
+				height:        200px;
+				font-size:     18px;
+			}
+			
+			.form-field label {
+				font-size:     22px;
+				display:       block;
+			}
+			
+			#btn-submit {
+				margin-top:    7px;
+				margin-bottom: 7px;
+				font-size:     20px;
+			}
+			
+			.error {
+				color:         #f44242;
+				font-size:     14px;
+			}
+		</style>
 	</head>
 	<body>
-		<header>
-			<nav class="navbar">
-				<ul>
-					<li><a href="/">Home</a></li>
-					<li><a href="/newpost">New Post</a></li>
-				</ul>
-			</nav>
-		</header>
-		<div class="main-content">
-			{% block content %}
-			
-			{% endblock %}
+		<div class="middle-col">
+			<header>
+				<nav class="navbar">
+					<ul>
+						<li><a href="/">Home</a></li>
+						<li><a href="/newpost">New Post</a></li>
+					</ul>
+				</nav>
+			</header>
+			<div class="main-content">
+				{% block content %}
+				
+				{% endblock %}
+			</div>
 		</div>
 	</body>
 </html>
