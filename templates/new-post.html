@@ -7,13 +7,14 @@
 	<div class="form-field">
 		<label>
 			Title
-			<input type="text" name="post-title" />
+			<input type="text" name="post-title" required />
 		</label>
+		<span class="error"> {{ error }} </span>
 	</div>
 	<div class="form-field">
 		<label>
 			Text
-			<textarea name="post-body"></textarea>
+			<textarea name="post-body" required ></textarea>
 		</label>
 	</div>
 	<div class="form-field">
