@@ -36,7 +36,7 @@ class Handler(webapp2.RequestHandler):
 	"""Base request handler class for the entire app"""
 	def renderError(self, error_code):
 		self.error(error_code)
-		#self.response.write("Something went wrong while loading this page! If you'd like more info on the error, you can search for the error code below: <br />" + str(error_code))
+		self.response.write("Something went wrong while loading this page! If you'd like more info on the error, you can search for the error code below: <br />" + str(error_code))
 
 		
 class MainHandler(Handler):
